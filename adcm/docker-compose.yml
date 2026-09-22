@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  adcm:
+    image: arenadata/adcm:latest
+    container_name: adcm-server
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+      - "9443:443"
+    volumes:
+      - adcm-data:/adcm/data
+      - adcm-log:/adcm/log
+      - ./adcm.env:/adcm.env:ro
+    environment:
+      - ADCM_VERSION=latest
+      - ADCM_DEBUG=false
+    networks:
+      - adcm-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  adcm-db:
+    image: postgres:15-alpine
+    container_name: adcm-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=adcm
+      - POSTGRES_USER=adcm
+      - POSTGRES_PASSWORD=${ADCM_DB_PASSWORD:-adcm123}
+    volumes:
+      - adcm-db-data:/var/lib/postgresql/data
+    networks:
+      - adcm-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adcm -d adcm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  adcm-data:
+  adcm-log:
+  adcm-db-data:
+
+networks:
+  adcm-net:
+    driver: bridge

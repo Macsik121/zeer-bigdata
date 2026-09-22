@@ -1,0 +1,953 @@
+# План создания домашней Big Data инфраструктуры Zeer Marketplace v2.1
+
+# 1. Обзор проекта
+
+## Цель проекта
+
+Создать домашнюю распределенную Big Data платформу для обработки данных маркетплейса Zeer.
+
+Система должна обеспечивать:
+
+* сбор пользовательских событий;
+* обработку логов приложения;
+* анализ ошибок и crash-событий;
+* хранение данных в Data Lake;
+* выполнение распределенных вычислений;
+* подготовку аналитических витрин;
+* доступ через API, SQL и BI-инструменты.
+
+Архитектура строится на Apache Hadoop ecosystem:
+
+* HDFS;
+* YARN;
+* Spark;
+* Kafka;
+* ZooKeeper;
+* Hive;
+* Node.js API;
+* Grafana/Prometheus.
+
+---
+
+# 2. Общая архитектура системы
+
+Общий поток данных:
+
+```
+Zeer Marketplace
+        |
+        |
+        v
+Node.js API Collector
+        |
+        |
+        v
+Kafka Cluster
+        |
+        |
+        v
+HDFS Data Lake
+        |
+        |
+        v
+Spark on YARN
+        |
+        |
+        v
+Hive SQL Layer
+        |
+        |
+        v
+BI / Reports / API
+```
+
+---
+
+# 3. Аппаратная архитектура
+
+## 3.1 Общая схема
+
+Используется:
+
+* 1 рабочий ноутбук как Master Node;
+* 3 физических ПК как DataNode.
+
+Архитектура:
+
+```
+                    WORK LAPTOP
+
+                    MASTER NODE
+
+        ---------------------------------
+
+        NameNode
+
+        ResourceManager
+
+        Hive Metastore
+
+        Spark History Server
+
+        Node.js API
+
+        Monitoring
+
+
+                    |
+                    |
+              Ethernet LAN 1Gb
+
+
+================================================
+
+
+       PC-1              PC-2              PC-3
+
+
+    DATANODE          DATANODE          DATANODE
+
+    NodeManager       NodeManager       NodeManager
+
+    Spark Worker      Spark Worker      Spark Worker
+
+    Kafka Broker      Kafka Broker      Kafka Broker
+
+    ZooKeeper         ZooKeeper         ZooKeeper
+```
+
+---
+
+# 4. Конфигурация оборудования
+
+## 4.1 Master Node
+
+Рабочий ноутбук.
+
+Роль:
+
+Control Plane.
+
+Компоненты:
+
+* HDFS NameNode;
+* YARN ResourceManager;
+* Hive Metastore;
+* Spark History Server;
+* Node.js API;
+* Grafana;
+* Prometheus.
+
+Рекомендуемые характеристики:
+
+```
+CPU:
+4+ cores
+
+RAM:
+16 GB+
+
+Disk:
+SSD
+```
+
+---
+
+# 4.2 DataNode 1-3
+
+Каждый физический ПК:
+
+```
+CPU:
+Intel Core i7 2-3 поколения или Intel Xeon e3 1275 или любой другой Xeon со встроенной графикой
+4 ядра / 8 потоков
+
+
+RAM:
+16 GB
+
+
+Disk:
+512 GB HDD/SSD
+
+
+Network:
+1 Gb Ethernet
+```
+
+Роли каждого узла:
+
+* HDFS DataNode;
+* YARN NodeManager;
+* Spark Executor;
+* Kafka Broker.
+
+---
+
+# 5. Сетевая архитектура
+
+Все устройства находятся в одной локальной сети.
+
+Пример:
+
+```
+Master Laptop
+
+192.168.1.5
+
+
+DataNode1
+
+192.168.1.10
+
+
+DataNode2
+
+192.168.1.11
+
+
+DataNode3
+
+192.168.1.12
+```
+
+---
+
+На всех устройствах:
+
+Файл:
+
+```
+/etc/hosts
+```
+
+пример:
+
+```
+192.168.1.5  zeer-master
+
+192.168.1.10 zeer-worker1
+
+192.168.1.11 zeer-worker2
+
+192.168.1.12 zeer-worker3
+```
+
+---
+
+# 6. Требования к сети
+
+Минимальные требования:
+
+* Ethernet 1Gb;
+* статические IP;
+* стабильное соединение;
+* единая подсеть.
+
+Проверка:
+
+```bash
+ping zeer-worker1
+ping zeer-worker2
+ping zeer-worker3
+```
+
+Проверка скорости:
+
+```bash
+iperf3
+```
+
+---
+
+# 7. Выбор компонентов
+
+## Hadoop
+
+Используется:
+
+Apache Hadoop 3.x
+
+Компоненты:
+
+* HDFS;
+* YARN;
+* MapReduce.
+
+---
+
+## Spark
+
+Используется:
+
+Apache Spark 3.x.
+
+Режим запуска:
+
+```
+Spark on YARN
+```
+
+Не используется:
+
+```
+Spark Standalone
+```
+
+Причина:
+
+YARN отвечает за распределение ресурсов между приложениями.
+
+---
+
+## Kafka
+
+Используется:
+
+Apache Kafka.
+
+Архитектура:
+
+```
+Broker 1
+
+Broker 2
+
+Broker 3
+```
+
+Каждый DataNode содержит Kafka Broker.
+
+---
+
+## ZooKeeper
+
+Используется:
+
+3-node ensemble:
+
+```
+zeer-worker1
+
+zeer-worker2
+
+zeer-worker3
+```
+
+Назначение:
+
+* координация Kafka;
+* управление кластером.
+
+---
+
+# 8. Распределение ресурсов
+
+## DataNode
+
+16 GB RAM.
+
+Рекомендуемое распределение:
+
+```
+Operating System:
+
+2 GB
+
+
+YARN:
+
+10-12 GB
+
+
+Spark Executor:
+
+5-6 GB
+
+
+Kafka:
+
+1-2 GB
+```
+
+---
+
+CPU:
+
+```
+4 cores / 8 threads
+```
+
+Для YARN:
+
+```
+6 vcores
+```
+
+---
+
+# 9. HDFS архитектура
+
+Схема:
+
+```
+                NameNode
+
+                    |
+
+     --------------------------------
+
+     |              |              |
+
+ DataNode1      DataNode2      DataNode3
+```
+
+---
+
+## Репликация
+
+Настройка:
+
+```
+dfs.replication=2
+```
+
+Причина:
+
+3 DataNode позволяют пережить отказ одного узла.
+
+При этом сохраняется больше полезного места.
+
+---
+
+Пример:
+
+Файл:
+
+```
+events.parquet
+```
+
+будет размещен:
+
+```
+Block A:
+
+DataNode1
+
+DataNode2
+```
+
+или:
+
+```
+DataNode2
+
+DataNode3
+```
+
+---
+
+# 10. YARN архитектура
+
+Master:
+
+```
+ResourceManager
+```
+
+Worker:
+
+```
+NodeManager
+```
+
+Схема:
+
+```
+ResourceManager
+
+        |
+
+------------------------
+
+|          |            |
+
+NM1        NM2          NM3
+```
+
+---
+
+Запуск:
+
+```bash
+start-yarn.sh
+```
+
+Проверка:
+
+```bash
+yarn node -list
+```
+
+---
+
+# 11. Spark архитектура
+
+Spark работает поверх YARN.
+
+Схема:
+
+```
+Spark Application
+
+        |
+
+        v
+
+YARN ResourceManager
+
+        |
+
+----------------------
+
+|          |          |
+
+Executor  Executor  Executor
+
+DN1       DN2       DN3
+```
+
+---
+
+Настройки:
+
+```
+Executor memory:
+
+5-6 GB
+
+
+Executor cores:
+
+3
+```
+
+---
+
+# 12. Kafka архитектура
+
+Kafka размещается на DataNode.
+
+Схема:
+
+```
+Kafka Broker1
+
+Kafka Broker2
+
+Kafka Broker3
+```
+
+---
+
+Темы Zeer:
+
+```
+zeer-user-events
+
+zeer-crash-events
+
+zeer-security-events
+```
+
+---
+
+Пример:
+
+```
+partitions=6
+
+replication-factor=3
+```
+
+---
+
+# 13. Data Pipeline Zeer
+
+## Пользовательские события
+
+Пример:
+
+```json
+{
+"userId":"123",
+"event":"product_view",
+"productId":"456",
+"time":"2026-09-21T15:30:00"
+}
+```
+
+Поток:
+
+```
+Node.js API
+
+     |
+
+Kafka
+
+     |
+
+Spark Streaming
+
+     |
+
+HDFS Parquet
+```
+
+---
+
+# 14. Spark аналитика
+
+Spark выполняет:
+
+* очистку данных;
+* агрегацию;
+* подготовку витрин;
+* ML анализ.
+
+Примеры:
+
+## User Analytics
+
+Расчёт:
+
+* количество просмотров;
+* популярность товаров;
+* активность пользователей;
+* конверсия.
+
+---
+
+## Crash Analytics
+
+Расчёт:
+
+* количество ошибок;
+* версии приложения;
+* устройства;
+* время возникновения.
+
+---
+
+# 15. Hive SQL слой
+
+Используется для аналитики.
+
+Пример таблицы:
+
+```
+zeer_events
+```
+
+Поля:
+
+```
+timestamp
+
+user_id
+
+event
+
+product_id
+
+category
+```
+
+---
+
+Пример запроса:
+
+```sql
+SELECT
+category,
+count(*)
+
+FROM zeer_events
+
+GROUP BY category;
+```
+
+---
+
+# 16. Node.js API
+
+Ноутбук выполняет роль входного узла.
+
+Функции:
+
+* получение событий;
+* отправка данных в Kafka;
+* запуск Spark jobs;
+* мониторинг кластера.
+
+Пример:
+
+```
+POST /api/events
+```
+
+---
+
+# 17. Клиентский доступ
+
+Поддерживаются:
+
+## REST API
+
+Node.js.
+
+---
+
+## Kafka
+
+Для приложений и сервисов.
+
+---
+
+## SQL
+
+Через:
+
+* Hive JDBC;
+* BI инструменты.
+
+---
+
+## Notebook
+
+Подключение:
+
+* Jupyter;
+* Spark SQL.
+
+---
+
+# 18. Мониторинг
+
+Используется:
+
+* Prometheus;
+* Grafana.
+
+Контролируется:
+
+CPU:
+
+```
+usage
+load
+```
+
+RAM:
+
+```
+memory utilization
+```
+
+HDFS:
+
+```
+capacity
+blocks
+replication
+```
+
+YARN:
+
+```
+containers
+applications
+```
+
+Kafka:
+
+```
+broker health
+consumer lag
+```
+
+---
+
+# 19. Проверка кластера
+
+## HDFS
+
+```bash
+hdfs dfsadmin -report
+```
+
+Ожидается:
+
+```
+Live datanodes (3)
+```
+
+---
+
+## YARN
+
+```bash
+yarn node -list
+```
+
+Ожидается:
+
+```
+3 RUNNING nodes
+```
+
+---
+
+## Kafka
+
+```bash
+kafka-topics.sh \
+--bootstrap-server zeer-worker1:9092 \
+--list
+```
+
+---
+
+## Spark
+
+Запуск:
+
+```bash
+spark-submit \
+--master yarn \
+application.jar
+```
+
+---
+
+# 20. Ограничения архитектуры
+
+Данная система является:
+
+```
+Home Big Data Laboratory Cluster
+```
+
+Она подходит для:
+
+* обучения Hadoop ecosystem;
+* разработки ETL;
+* демонстрации архитектуры;
+* портфолио Big Data Engineer.
+
+Она не является:
+
+* production marketplace cluster;
+* отказоустойчивым enterprise deployment.
+
+---
+
+# 21. Возможные дальнейшие улучшения
+
+## Добавление четвертого DataNode
+
+Позволит:
+
+* увеличить storage;
+* увеличить Spark capacity;
+* повысить отказоустойчивость.
+
+---
+
+## Замена HDD на SSD
+
+Улучшит:
+
+* Kafka throughput;
+* Spark shuffle;
+* HDFS operations.
+
+---
+
+## Добавление SQL слоя
+
+Можно добавить:
+
+* HiveServer2;
+* Trino;
+* Impala.
+
+---
+
+## Безопасность
+
+Следующий этап:
+
+* Kerberos;
+* Ranger;
+* TLS;
+* аудит.
+
+---
+
+# Итоговая архитектура Zeer Marketplace v2.1
+
+```
+                    Zeer Marketplace
+
+                           |
+
+                           v
+
+                    Node.js API
+
+                           |
+
+                           v
+
+                     Kafka Cluster
+
+                           |
+
+                           v
+
+                    HDFS Data Lake
+
+                           |
+
+                           v
+
+                    Spark on YARN
+
+                           |
+
+                           v
+
+                   Hive SQL / BI Layer
+
+
+          Master Laptop
+
+          Control Plane
+
+
+          3 Physical PCs
+
+          Data Plane
+```
+
+Данная архитектура оптимизирована под домашний кластер:
+
+* 1 Master Node;
+* 3 DataNode;
+* 3 вычислительных узла;
+* распределённое хранение;
+* распределённые вычисления;
+* полноценный Big Data pipeline.
