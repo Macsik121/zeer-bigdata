@@ -1,0 +1,786 @@
+<title>Zeer Big Data — Дипломная работа</title>
+
+<style>
+:root {
+  --bg: #fafafa;
+  --text: #1a1a1a;
+  --accent: #d97706;
+  --accent-soft: #f59e0b;
+  --secondary: #57534e;
+  --border: #d6d3d1;
+  --card: #ffffff;
+  --success: #059669;
+  --data-blue: #0891b2;
+  --gradient-from: #ea580c;
+  --gradient-to: #dc2626;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c0a09;
+    --text: #fafaf9;
+    --accent: #fb923c;
+    --accent-soft: #fdba74;
+    --secondary: #a8a29e;
+    --border: #44403c;
+    --card: #1c1917;
+    --success: #10b981;
+    --data-blue: #06b6d4;
+    --gradient-from: #f97316;
+    --gradient-to: #ef4444;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0c0a09;
+  --text: #fafaf9;
+  --accent: #fb923c;
+  --accent-soft: #fdba74;
+  --secondary: #a8a29e;
+  --border: #44403c;
+  --card: #1c1917;
+  --success: #10b981;
+  --data-blue: #06b6d4;
+  --gradient-from: #f97316;
+  --gradient-to: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-se
+rif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.hero {
+  padding: 3.5rem 2rem;
+  background: linear-gradient(135deg, var(--gradient-from) 0%, var(--gradient-to) 100%);
+  border-radius: 8px;
+  margin-bottom: 2.5rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 40%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.05);
+  transform: rotate(15deg);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  text-wrap: balance;
+}
+
+.hero-subtitle {
+  font-size: 1.125rem;
+  opacity: 0.95;
+  max-width: 700px;
+  font-weight: 400;
+}
+
+.section {
+  margin-bottom: 3rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.section-icon {
+  font-size: 1.75rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.card-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.card li {
+  padding: 0.5rem 0;
+  padding-left: 1.25rem;
+  position: relative;
+  font-size: 0.9375rem;
+}
+
+.card li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: var(--accent-soft);
+  font-weight: 600;
+}
+
+.highlight {
+  background: var(--card);
+  border-left: 4px solid var(--accent);
+  padding: 1.5rem;
+  border-radius: 4px;
+  margin: 1.5rem 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.stat {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  color: var(--secondary);
+  font-size: 0.8125rem;
+  margin-top: 0.375rem;
+  display: block;
+}
+
+.tech-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  margin-top: 1rem;
+}
+
+.tech-badge {
+  background: var(--accent);
+  color: white;
+  padding: 0.5rem 0.875rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+  margin-top: 1.5rem;
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 1.75rem;
+}
+
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -2rem;
+  top: 0.375rem;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--bg);
+}
+
+.timeline-item::after {
+  content: "";
+  position: absolute;
+  left: -1.69rem;
+  top: 1rem;
+  width: 2px;
+  height: calc(100% - 0.5rem);
+  background: var(--border);
+}
+
+.timeline-item:last-child::after {
+  display: none;
+}
+
+.timeline-title {
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.timeline-detail {
+  color: var(--secondary);
+  font-size: 0.875rem;
+}
+
+.metrics-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 1.5rem;
+}
+
+.metric-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.25rem;
+}
+
+.metric-header {
+  font-size: 0.8125rem;
+  color: var(--secondary);
+  margin-bottom: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--data-blue);
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-desc {
+  font-size: 0.8125rem;
+  margin-top: 0.625rem;
+  color: var(--secondary);
+  line-height: 1.5;
+}
+
+.two-col {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.bullet-list {
+  list-style: disc;
+  padding-left: 1.5rem;
+  color: var(--text);
+}
+
+.bullet-list li {
+  margin: 0.75rem 0;
+  padding-left: 0;
+}
+
+.bullet-list li::before {
+  display: none;
+}
+
+.footer {
+  text-align: center;
+  padding: 2rem;
+  background: var(--card);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  margin-top: 3rem;
+}
+
+.footer h3 {
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  font-size: 1.125rem;
+}
+
+.footer p {
+  color: var(--secondary);
+  font-size: 0.9375rem;
+  line-height: 1.8;
+}
+
+@media (max-width: 640px) {
+  .hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .container {
+    padding: 1rem;
+  }
+}
+</style>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-content">
+      <h1>Разработка распределённой системы обработки и анализа логов маркетплейса</h1>
+      <p class="hero-subtitle">
+        Apache Hadoop экосистема • Lambda-архитектура • Machine Learning конвейер • 4-узловой кластер
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">📋</span>
+      <h2 class="section-title">Суть проекта</h2>
+    </div>
+    <div class="highlight">
+      <p>
+        Комплексное решение для сбора, хранения, обработки и анализа логов онлайн-маркетплейса <strong
+>Zeer Marketplace</strong>
+        с использованием технологий Apache Hadoop экосистемы на физическом кластере из <strong>4 узлов
+</strong>
+        (1 Master + 3 Worker). Обработка трёх типов логов, Lambda-архитектура, 28 бизнес-метрик, ML-ко
+нвейер.
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">⚡</span>
+      <h2 class="section-title">Ключевые особенности</h2>
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>💻 Инфраструктура</h3>
+        <ul>
+          <li>Домашний кластер LGA 1155</li>
+          <li>Бюджет: 50-70 тыс. руб.</li>
+          <li>Охлаждение и безопасность</li>
+          <li>Ubuntu Server 22.04 LTS</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>📝 Типы логов</h3>
+        <ul>
+          <li>Action Logs (действия)</li>
+          <li>Crash Logs (сбои)</li>
+          <li>Inject Logs (инжекция)</li>
+          <li>14+ млн событий/сутки</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>🏗️ Архитектура</h3>
+        <ul>
+          <li>Lambda-архитектура</li>
+          <li>Batch: HDFS + Spark SQL</li>
+          <li>Streaming: Kafka + Spark</li>
+          <li>ELT-конвейер с DQ Gate</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>📊 Аналитика</h3>
+        <ul>
+          <li>28 бизнес-метрик</li>
+          <li>5 доменов анализа</li>
+          <li>ML-предсказания</li>
+          <li>Real-time дашборды</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🎯</span>
+      <h2 class="section-title">Актуальность</h2>
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>🔬 Техническая</h3>
+        <ul>
+          <li>Миллионы событий в сутки</li>
+          <li>Real-time + batch обработка</li>
+          <li>Proactive monitoring</li>
+          <li>Горизонтальное масштабирование</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>💼 Бизнес</h3>
+        <ul>
+          <li>↑ Конверсия на 15-30%</li>
+          <li>↓ Отток на 20-40%</li>
+          <li>Fraud detection: экономия 10-15%</li>
+          <li>Окупаемость: 6-8 месяцев</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>📚 Образовательная</h3>
+        <ul>
+          <li>Полный цикл Big Data</li>
+          <li>Hadoop экосистема на практике</li>
+          <li>От железа до ML-моделей</li>
+          <li>Реальные инженерные задачи</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🔬</span>
+      <h2 class="section-title">Научная новизна</h2>
+    </div>
+    <div class="highlight">
+      <ul class="bullet-list">
+        <li>
+          <strong>Гибридная архитектура на бюджетном оборудовании:</strong>
+          адаптация корпоративной Lambda-архитектуры для домашнего кластера с ограниченными ресурсами
+        </li>
+        <li>
+          <strong>Многоуровневая детекция аномалий:</strong>
+          комбинация streaming (near-real-time alerts) и batch (глубокий анализ) для security-метрик
+        </li>
+        <li>
+          <strong>Контекстно-зависимые ML-модели:</strong>
+          классификатор крэшей с embedding'ами stack trace и таксономией Windows-исключений
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🎯</span>
+      <h2 class="section-title">Цель работы</h2>
+    </div>
+    <div class="highlight">
+      <p style="font-size: 1.0625rem; font-weight: 500; margin-bottom: 1rem;">
+        Разработать и внедрить отказоустойчивую распределённую систему обработки больших данных логов
+маркетплейса,
+        обеспечивающую <strong>real-time мониторинг</strong> (latency &lt; 5 мин) и
+        <strong>batch-аналитику</strong> (latency &lt; 1 час).
+      </p>
+    </div>
+
+    <div class="card-grid" style="margin-top: 1.5rem;">
+      <div class="card">
+        <h3>🏗️ Инфраструктурные</h3>
+        <ul>
+          <li>Собрать 4-узловой кластер</li>
+          <li>Развернуть Hadoop экосистему</li>
+          <li>Настроить fault tolerance (RF=2)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>🏛️ Архитектурные</h3>
+        <ul>
+          <li>Lambda-архитектура</li>
+          <li>Схемы данных + DQ Gate</li>
+          <li>ELT-конвейер</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>📊 Аналитические</h3>
+        <ul>
+          <li>28 метрик × 5 доменов</li>
+          <li>Data Mart витрины</li>
+          <li>Система алертов + runbook'и</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>🤖 ML/AI</h3>
+        <ul>
+          <li>Feature Engineering pipeline</li>
+          <li>3 ML-модели (классификация + регрессия)</li>
+          <li>FastAPI inference service</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">📈</span>
+      <h2 class="section-title">Ожидаемые результаты</h2>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-value">14M+</span>
+        <span class="stat-label">событий/сутки</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">&lt; 5 мин</span>
+        <span class="stat-label">latency streaming</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">&gt; 98%</span>
+        <span class="stat-label">injection success</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">F1 &gt; 0.85</span>
+        <span class="stat-label">ML accuracy</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">99.5%</span>
+        <span class="stat-label">uptime</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">28</span>
+        <span class="stat-label">метрик</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🛠️</span>
+      <h2 class="section-title">Технологический стек</h2>
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>Hadoop Ecosystem</h3>
+        <div class="tech-grid">
+          <span class="tech-badge">HDFS</span>
+          <span class="tech-badge">YARN</span>
+          <span class="tech-badge">Kafka</span>
+          <span class="tech-badge">Spark</span>
+          <span class="tech-badge">Flume</span>
+          <span class="tech-badge">Hive</span>
+          <span class="tech-badge">ZooKeeper</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Аналитика и ML</h3>
+        <div class="tech-grid">
+          <span class="tech-badge">Spark MLlib</span>
+          <span class="tech-badge">FastAPI</span>
+          <span class="tech-badge">Grafana</span>
+          <span class="tech-badge">Prometheus</span>
+          <span class="tech-badge">Superset</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Разработка</h3>
+        <div class="tech-grid">
+          <span class="tech-badge">Python 3.9+</span>
+          <span class="tech-badge">Scala 2.12</span>
+          <span class="tech-badge">Node.js 14+</span>
+          <span class="tech-badge">Ubuntu 22.04</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">📊</span>
+      <h2 class="section-title">28 метрик по 5 доменам</h2>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-header">A. Бизнес-метрики</div>
+        <div class="metric-value">6</div>
+        <p class="metric-desc">
+          DAU/MAU, Конверсия, ARPPU, Churn Rate, Промокоды, Key Activation
+        </p>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">B. Продуктовые</div>
+        <div class="metric-value">5</div>
+        <p class="metric-desc">
+          Популярность, Длительность сессий, Платформы, Версии, Steam-связь
+        </p>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">C. Технические</div>
+        <div class="metric-value">7</div>
+        <p class="metric-desc">
+          Crash Rate, Exception codes, Injection Success, Latency P95/P99
+        </p>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">D. Безопасность</div>
+        <div class="metric-value">6</div>
+        <p class="metric-desc">
+          Шаринг аккаунтов, Brute-force, HWID-аномалия, Геоаномалия
+        </p>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">E. Конвейер</div>
+        <div class="metric-value">4</div>
+        <p class="metric-desc">
+          Kafka lag, Time to Insight, Data Quality, Job uptime
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">⏱️</span>
+      <h2 class="section-title">Roadmap реализации (10 недель)</h2>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-title">Недели 1-2: Foundation</div>
+        <div class="timeline-detail">Схемы данных, Kafka, Flume, HDFS, Hive</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-title">Недели 3-4: Core Analytics</div>
+        <div class="timeline-detail">Batch/streaming jobs, дашборды Grafana</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-title">Недели 5-6: ML Platform</div>
+        <div class="timeline-detail">Feature engineering, обучение моделей</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-title">Недели 7-8: Advanced Analytics</div>
+        <div class="timeline-detail">Предсказательные модели, fraud detection</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-title">Недели 9-10: Production Hardening</div>
+        <div class="timeline-detail">Тестирование, документация, подготовка к защите</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">💰</span>
+      <h2 class="section-title">Бюджет и эффективность</h2>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3>💵 Стоимость</h3>
+        <ul>
+          <li>Оборудование: 50-70 тыс. руб.</li>
+          <li>ПО: бесплатное (Apache License)</li>
+          <li>vs Облако: 300+ тыс. руб./год</li>
+          <li>Экономия: 4-6× за первый год</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>📈 Окупаемость</h3>
+        <ul>
+          <li>Снижение оттока → +20-40% retention</li>
+          <li>Оптимизация конверсии → +15-30%</li>
+          <li>Fraud detection → экономия 10-15%</li>
+          <li>Период окупаемости: 6-8 месяцев</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">✨</span>
+      <h2 class="section-title">Практическая значимость</h2>
+    </div>
+    <div class="highlight">
+      <ul class="bullet-list">
+        <li>
+          <strong>Масштабируемость:</strong> архитектура позволяет добавлять узлы без переписывания ко
+да
+        </li>
+        <li>
+          <strong>Применимость:</strong> решение адаптируется для любого веб-сервиса с логированием со
+бытий (e-commerce, SaaS, gaming)
+        </li>
+        <li>
+          <strong>Образовательная ценность:</strong> демонстрация полного цикла разработки Big Data ре
+шения — от физического оборудования до ML-моделей
+        </li>
+        <li>
+          <strong>Экономическая эффективность:</strong> бюджетное решение с окупаемостью через 6-8 мес
+яцев за счёт оптимизации метрик
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <h3>Контакты</h3>
+    <p>
+      Салий Максим Александрович<br>
+      akmaksa65@gmail.com<br>
+      Сентябрь 2026
+    </p>
+  </div>
+</div>
